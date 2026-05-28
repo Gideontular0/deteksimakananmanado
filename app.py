@@ -7,7 +7,7 @@ import io
 # 1. KONFIGURASI HALAMAN (Wajib di Paling Atas)
 # ==========================================
 st.set_page_config(
-    page_title="Minahasa Food AI",
+    page_title="Manado Deteksi Makanan",
     page_icon="🍲",
     layout="wide", 
     initial_sidebar_state="expanded"
@@ -93,12 +93,12 @@ st.markdown("""
         align-items: center;
         border-bottom: 2px dashed rgba(128, 128, 128, 0.3);
         padding-bottom: 12px;
-        margin-bottom: 16px;
+        margin-bottom: 20px; /* Jarak dari header ke item pertama diperlebar */
     }
     .recipe-title {
         font-size: 1.4rem;
         font-weight: 700;
-        color: var(--text-color); /* Warna mengikuti tema Streamlit */
+        color: var(--text-color); 
         margin: 0;
     }
     .recipe-badge {
@@ -109,19 +109,26 @@ st.markdown("""
         font-size: 0.85rem;
         font-weight: 600;
     }
+    
+    /* REVISI BAGIAN LIST BAHAN */
     .ingredient-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
+        list-style: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: flex;
+        flex-direction: column;
+        gap: 12px; /* Mengunci jarak spasi konsisten ke bawah antar item sebesar 12px */
     }
     .ingredient-item {
+        display: block !important; /* Memaksa setiap bahan membuat baris baru ke bawah */
         background-color: var(--background-color);
-        color: var(--text-color); /* Warna menyesuaikan tema agar selalu terbaca */
-        padding: 8px 16px;
+        color: var(--text-color); 
+        padding: 10px 16px; /* Spasi dalam box bahan diperluas sedikit */
         border-radius: 8px;
-        margin-bottom: 8px;
         font-size: 0.95rem;
-        border-left: 3px solid #FF8E53;
+        border-left: 4px solid #FF8E53; /* Garis aksen dipertebal menjadi 4px */
+        margin: 0 !important; /* Reset margin bawaan browser */
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
 
     /* Footer */
@@ -173,7 +180,7 @@ except Exception as e:
 # 5. SIDEBAR PENGATURAN (PROFESSIONAL TOUCH)
 # ==========================================
 with st.sidebar:
-    st.markdown("### ⚙️ Pengaturan AI")
+    st.markdown("### ⚙️ Pengaturan")
     # Informasi bahwa threshold sudah dikunci (slider dihilangkan)
     st.info("🔒 **Tingkat Keyakinan (Confidence): 75%**\n\n*Threshold dikunci secara sistem untuk memastikan akurasi deteksi maksimal.*")
     conf_threshold = 0.75
@@ -187,8 +194,8 @@ with st.sidebar:
 # 6. HEADER APLIKASI UTAMA
 # ==========================================
 st.markdown('<div class="app-header">', unsafe_allow_html=True)
-st.markdown('<h1 class="main-title">Minahasa Food AI</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-title">Sistem Visi Komputer untuk Deteksi Kuliner Khas Minahasa</p>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-title">Deteksi Makanan Manado</h1>', unsafe_allow_html=True)
+st.markdown('<p class="sub-title">Sistem Visi Komputer untuk Deteksi Kuliner Khas Manado dan bahan</p>', unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
@@ -248,7 +255,8 @@ if uploaded_file is not None and model_loaded:
                     
                     bahan_list = kumpulan_bahan.get(class_name, ["Data tidak ditemukan."])
                     
-                    ingredients_html = "".join([f'<li class="ingredient-item">{item}</li>' for item in bahan_list])
+                    # Membuat elemen list terpisah secara bersih ke bawah
+                    ingredients_html = "".join([f'<div class="ingredient-item">💡 {item}</div>' for item in bahan_list])
                     
                     card_html = f"""
                     <div class="recipe-card">
@@ -256,9 +264,9 @@ if uploaded_file is not None and model_loaded:
                             <h3 class="recipe-title">🍲 {display_name}</h3>
                             <span class="recipe-badge">Akurasi: {confidence:.1f}%</span>
                         </div>
-                        <ul class="ingredient-list">
+                        <div class="ingredient-list">
                             {ingredients_html}
-                        </ul>
+                        </div>
                     </div>
                     """
                     
@@ -272,7 +280,7 @@ if uploaded_file is not None and model_loaded:
 # ==========================================
 st.markdown(
     '<div class="footer">'
-    '<b>Minahasa Food AI Core</b><br>'
+    '<b>Manado Deteksi Makanan</b><br>'
     'Dikembangkan oleh GideoN Tular | Universitas Prisma'
     '</div>', 
     unsafe_allow_html=True
