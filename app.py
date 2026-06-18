@@ -9,7 +9,7 @@ import io
 st.set_page_config(
     page_title="Manado Deteksi Makanan",
     page_icon="🍲",
-    layout="wide", 
+    layout="wide",
     initial_sidebar_state="expanded"
 )
 
@@ -19,7 +19,7 @@ st.set_page_config(
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-    
+
     html, body, [class*="css"] {
         font-family: 'Plus Jakarta Sans', sans-serif;
     }
@@ -62,7 +62,7 @@ st.markdown("""
     .stButton>button:hover {
         transform: translateY(-2px);
         box-shadow: 0 15px 25px -10px rgba(255, 107, 107, 0.6);
-        color: white !important; /* Memastikan teks tetap putih saat di-hover */
+        color: white !important;
     }
 
     /* Styling Gambar */
@@ -72,9 +72,9 @@ st.markdown("""
         border: 1px solid rgba(128, 128, 128, 0.2);
     }
 
-    /* Custom Recipe Card - Auto menyesuaikan tema terang/gelap */
+    /* Custom Recipe Card */
     .recipe-card {
-        background-color: var(--secondary-background-color); 
+        background-color: var(--secondary-background-color);
         border-radius: 16px;
         padding: 24px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -93,12 +93,12 @@ st.markdown("""
         align-items: center;
         border-bottom: 2px dashed rgba(128, 128, 128, 0.3);
         padding-bottom: 12px;
-        margin-bottom: 20px; /* Jarak dari header ke item pertama diperlebar */
+        margin-bottom: 20px;
     }
     .recipe-title {
         font-size: 1.4rem;
         font-weight: 700;
-        color: var(--text-color); 
+        color: var(--text-color);
         margin: 0;
     }
     .recipe-badge {
@@ -109,26 +109,46 @@ st.markdown("""
         font-size: 0.85rem;
         font-weight: 600;
     }
-    
-    /* REVISI BAGIAN LIST BAHAN */
+    .recipe-badge-low {
+        background: #FEF3C7;
+        color: #92400E;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    /* List Bahan */
     .ingredient-list {
         list-style: none !important;
         padding: 0 !important;
         margin: 0 !important;
         display: flex;
         flex-direction: column;
-        gap: 12px; /* Mengunci jarak spasi konsisten ke bawah antar item sebesar 12px */
+        gap: 12px;
     }
     .ingredient-item {
-        display: block !important; /* Memaksa setiap bahan membuat baris baru ke bawah */
+        display: block !important;
         background-color: var(--background-color);
-        color: var(--text-color); 
-        padding: 10px 16px; /* Spasi dalam box bahan diperluas sedikit */
+        color: var(--text-color);
+        padding: 10px 16px;
         border-radius: 8px;
         font-size: 0.95rem;
-        border-left: 4px solid #FF8E53; /* Garis aksen dipertebal menjadi 4px */
-        margin: 0 !important; /* Reset margin bawaan browser */
+        border-left: 4px solid #FF8E53;
+        margin: 0 !important;
         box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    /* Peringatan Confidence Rendah */
+    .low-confidence-warning {
+        background-color: #FEF3C7;
+        border: 1px solid #F59E0B;
+        border-left: 4px solid #F59E0B;
+        border-radius: 8px;
+        padding: 10px 16px;
+        margin-top: 12px;
+        font-size: 0.88rem;
+        color: #92400E;
     }
 
     /* Footer */
@@ -141,8 +161,8 @@ st.markdown("""
         opacity: 0.7;
         font-size: 0.9rem;
     }
-    
-    /* Responsive font resizing */
+
+    /* Responsive */
     @media (max-width: 768px) {
         .main-title { font-size: 2.2rem; }
     }
@@ -153,13 +173,38 @@ st.markdown("""
 # 3. DATABASE BAHAN MAKANAN
 # ==========================================
 kumpulan_bahan = {
-    "ayamrica": ["Ayam", "Cabai merah", "Cabai rawit", "Bawang merah", "Bawang putih", "Jahe", "Serai", "Daun jeruk", "Perasan jeruk nipis", "Garam", "Gula", "Minyak sayur"],
-    "cakalangfufu": ["Ikan cakalang segar", "Garam", "Bumbu halus (bawang dan cabai)", "Pengasapan tradisional sabut kelapa"],
-    "ikanwoku": ["Ikan (Tuna/Kerapu/Mujair)", "Daun kemangi", "Daun kunyit", "Daun pandan", "Daun jeruk", "Serai", "Cabai hijau/merah", "Bawang merah", "Bawang putih", "Jahe", "Kunyit", "Kemiri", "Tomat", "Perasan jeruk nipis"],
-    "lalampa": ["Beras ketan", "Santan kelapa", "Daun pisang (sebagai pembungkus)", "Isian: Ikan cakalang pampis", "Cabai", "Bawang merah", "Bawang putih", "Serai", "Daun kemangi", "Daun jeruk"],
-    "nasijaha": ["Beras ketan", "Beras putih", "Santan kelapa", "Jahe", "Serai", "Bawang merah", "Daun jeruk", "Daun pandan", "Dibakar di dalam buluh bambu berlapis daun pisang"],
-    "panada": ["Adonan luar: Tepung terigu, ragi, gula, mentega, telur", "Isian: Ikan cakalang pampis, santan, cabai, bawang merah, bawang putih, daun kemangi, daun jeruk"],
-    "tinutuan": ["Beras", "Labu kuning", "Ubi jalar", "Jagung manis", "Daun gedi (sayuran endemik Sulut)", "Bayam", "Kangkung", "Kemangi", "Serai", "Garam", "Pelengkap: Ikan asin dan sambal roa"]
+    "ayamrica": [
+        "Ayam", "Cabai merah", "Cabai rawit", "Bawang merah", "Bawang putih",
+        "Jahe", "Serai", "Daun jeruk", "Perasan jeruk nipis", "Garam", "Gula", "Minyak sayur"
+    ],
+    "cakalangfufu": [
+        "Ikan cakalang segar", "Garam",
+        "Bumbu halus (bawang dan cabai)", "Pengasapan tradisional sabut kelapa"
+    ],
+    "ikanwoku": [
+        "Ikan (Tuna/Kerapu/Mujair)", "Daun kemangi", "Daun kunyit", "Daun pandan",
+        "Daun jeruk", "Serai", "Cabai hijau/merah", "Bawang merah", "Bawang putih",
+        "Jahe", "Kunyit", "Kemiri", "Tomat", "Perasan jeruk nipis"
+    ],
+    "lalampa": [
+        "Beras ketan", "Santan kelapa", "Daun pisang (sebagai pembungkus)",
+        "Isian: Ikan cakalang pampis", "Cabai", "Bawang merah", "Bawang putih",
+        "Serai", "Daun kemangi", "Daun jeruk"
+    ],
+    "nasijaha": [
+        "Beras ketan", "Beras putih", "Santan kelapa", "Jahe", "Serai",
+        "Bawang merah", "Daun jeruk", "Daun pandan",
+        "Dibakar di dalam buluh bambu berlapis daun pisang"
+    ],
+    "panada": [
+        "Adonan luar: Tepung terigu, ragi, gula, mentega, telur",
+        "Isian: Ikan cakalang pampis, santan, cabai, bawang merah, bawang putih, daun kemangi, daun jeruk"
+    ],
+    "tinutuan": [
+        "Beras", "Labu kuning", "Ubi jalar", "Jagung manis",
+        "Daun gedi (sayuran endemik Sulut)", "Bayam", "Kangkung", "Kemangi",
+        "Serai", "Garam", "Pelengkap: Ikan asin dan sambal roa"
+    ]
 }
 
 # ==========================================
@@ -177,25 +222,39 @@ except Exception as e:
     model_loaded = False
 
 # ==========================================
-# 5. SIDEBAR PENGATURAN (PROFESSIONAL TOUCH)
+# 5. SIDEBAR PENGATURAN
 # ==========================================
 with st.sidebar:
     st.markdown("### ⚙️ Pengaturan")
-    # Informasi bahwa threshold sudah dikunci (slider dihilangkan)
-    st.info("🔒 **Tingkat Keyakinan (Confidence): 75%**\n\n*Threshold dikunci secara sistem untuk memastikan akurasi deteksi maksimal.*")
-    conf_threshold = 0.75
-    
+    st.info(
+        "🔒 **Tingkat Keyakinan (Confidence): 75%**\n\n"
+        "*Threshold dikunci secara sistem untuk memastikan akurasi deteksi maksimal.*"
+    )
+    conf_threshold = 0.85
+
     st.markdown("---")
     st.markdown("### 📋 Objek Terdaftar")
     for item in kumpulan_bahan.keys():
         st.write(f"✓ {item.title().replace(' ', '')}")
+
+    st.markdown("---")
+    # ── TAMBAHAN BARU: Info batasan sistem di sidebar ──
+    st.markdown("### ℹ️ Batasan Sistem")
+    st.caption(
+        "Sistem ini **hanya** mendeteksi 7 makanan khas Manado di atas. "
+        "Makanan lain yang tampilannya serupa (contoh: Jalakote mirip Lalampa) "
+        "dapat menyebabkan hasil deteksi kurang akurat."
+    )
 
 # ==========================================
 # 6. HEADER APLIKASI UTAMA
 # ==========================================
 st.markdown('<div class="app-header">', unsafe_allow_html=True)
 st.markdown('<h1 class="main-title">Deteksi Makanan Manado</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-title">Sistem Visi Komputer untuk Deteksi Kuliner Khas Manado dan bahan</p>', unsafe_allow_html=True)
+st.markdown(
+    '<p class="sub-title">Sistem Visi Komputer untuk Deteksi Kuliner Khas Manado dan Bahan</p>',
+    unsafe_allow_html=True
+)
 st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
@@ -203,11 +262,13 @@ st.markdown('</div>', unsafe_allow_html=True)
 # ==========================================
 upload_col1, upload_col2, upload_col3 = st.columns([1, 2, 1])
 with upload_col2:
-    uploaded_file = st.file_uploader("Unggah foto masakan dari perangkat Anda", type=["jpg", "jpeg", "png"])
+    uploaded_file = st.file_uploader(
+        "Unggah foto masakan dari perangkat Anda", type=["jpg", "jpeg", "png"]
+    )
 
 if uploaded_file is not None and model_loaded:
     image = Image.open(uploaded_file)
-    
+
     act_col1, act_col2, act_col3 = st.columns([1, 1, 1])
     with act_col2:
         analyze_btn = st.button("✨ Mulai Analisis AI")
@@ -216,64 +277,90 @@ if uploaded_file is not None and model_loaded:
 
     if analyze_btn:
         with st.spinner("Menganalisis piksel gambar..."):
-            # Proses YOLO menggunakan threshold 0.75 yang sudah dikunci
             results = model.predict(image, conf=conf_threshold)
             res_image = results[0].plot()
             detected_image = Image.fromarray(res_image[..., ::-1])
             boxes = results[0].boxes
 
             tab1, tab2 = st.tabs(["🤖 Hasil Deteksi YOLO", "🖼️ Gambar Asli"])
-            
+
             with tab1:
                 st.markdown('<div class="img-container">', unsafe_allow_html=True)
                 st.image(detected_image, use_container_width=True)
                 st.markdown('</div>', unsafe_allow_html=True)
-            
+
             with tab2:
                 st.markdown('<div class="img-container">', unsafe_allow_html=True)
                 st.image(image, use_container_width=True)
                 st.markdown('</div>', unsafe_allow_html=True)
-                
+
             st.markdown("---")
-            
+
             if len(boxes) > 0:
                 st.success(f"Berhasil mengidentifikasi {len(boxes)} hidangan!")
+
+                # ── TAMBAHAN BARU 1: Disclaimer umum setelah deteksi berhasil ──
+                st.warning(
+                    "⚠️ **Perhatian:** Sistem ini hanya dapat mendeteksi 7 makanan khas Manado "
+                    "yang terdaftar. Makanan lain yang memiliki tampilan serupa (contoh: Jalakote "
+                    "mirip Lalampa) mungkin terdeteksi tidak akurat. Hasil deteksi bersifat "
+                    "sebagai referensi visual, bukan penilaian mutlak."
+                )
+
                 st.markdown("### 📋 Rincian Komposisi")
-                
+
                 cols = st.columns(2)
-                
+
                 for idx, box in enumerate(boxes):
                     class_id = int(box.cls[0])
                     class_name = model.names[class_id]
                     confidence = float(box.conf[0]) * 100
-                    
+
                     display_name = class_name.replace(" ", " ").title()
-                    if display_name.lower() == "ayamrica": display_name = "Ayam Rica"
+                    if display_name.lower() == "ayamrica":    display_name = "Ayam Rica"
                     if display_name.lower() == "cakalangfufu": display_name = "Cakalang Fufu"
-                    if display_name.lower() == "ikanwoku": display_name = "Ikan Woku"
-                    if display_name.lower() == "nasijaha": display_name = "Nasi Jaha"
-                    
+                    if display_name.lower() == "ikanwoku":    display_name = "Ikan Woku"
+                    if display_name.lower() == "nasijaha":    display_name = "Nasi Jaha"
+
                     bahan_list = kumpulan_bahan.get(class_name, ["Data tidak ditemukan."])
-                    
-                    # Membuat elemen list terpisah secara bersih ke bawah
-                    ingredients_html = "".join([f'<div class="ingredient-item">💡 {item}</div>' for item in bahan_list])
-                    
+                    ingredients_html = "".join(
+                        [f'<div class="ingredient-item">💡 {item}</div>' for item in bahan_list]
+                    )
+
+                    # ── TAMBAHAN BARU 2: Badge warna beda + peringatan kalau confidence rendah ──
+                    if confidence < 80:
+                        badge_class = "recipe-badge-low"
+                        low_conf_html = """
+                            <div class="low-confidence-warning">
+                                ⚠️ <b>Tingkat keyakinan rendah</b> — kemungkinan ada makanan 
+                                serupa di luar daftar yang terdeteksi. Mohon verifikasi secara visual.
+                            </div>
+                        """
+                    else:
+                        badge_class = "recipe-badge"
+                        low_conf_html = ""
+
                     card_html = f"""
                     <div class="recipe-card">
                         <div class="recipe-header">
                             <h3 class="recipe-title">🍲 {display_name}</h3>
-                            <span class="recipe-badge">Akurasi: {confidence:.1f}%</span>
+                            <span class="{badge_class}">Akurasi: {confidence:.1f}%</span>
                         </div>
                         <div class="ingredient-list">
                             {ingredients_html}
                         </div>
+                        {low_conf_html}
                     </div>
                     """
-                    
+
                     with cols[idx % 2]:
                         st.markdown(card_html, unsafe_allow_html=True)
+
             else:
-                st.warning("Model tidak menemukan makanan yang sesuai kriteria dengan tingkat keyakinan minimal 75%.")
+                st.warning(
+                    "Model tidak menemukan makanan yang sesuai kriteria dengan "
+                    "tingkat keyakinan minimal 75%."
+                )
 
 # ==========================================
 # 8. FOOTER
@@ -282,6 +369,6 @@ st.markdown(
     '<div class="footer">'
     '<b>Manado Deteksi Makanan</b><br>'
     'Dikembangkan oleh GideoN Tular | Universitas Prisma'
-    '</div>', 
+    '</div>',
     unsafe_allow_html=True
 )
